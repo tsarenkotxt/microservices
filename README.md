@@ -1,12 +1,13 @@
 ### Introduction
 
-`Pet` micro services project.
+`Pet` microservices project.
 
 * Docker
 * Spring Boot
 * Cassandra
 * ZooKeeper
 * Kafka
+* REST API
 
 ### Developer Environment
 
