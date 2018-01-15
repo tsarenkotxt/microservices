@@ -1,0 +1,1 @@
+`Cassandra` container wrapper with the initialization parameter of the database

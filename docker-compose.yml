@@ -1,0 +1,111 @@
+version: '3'
+
+services:
+
+  # cassandra
+  cassandra-node-1:
+    image: cassandra-node
+    container_name: cassandra-node-1
+    restart: always
+    ports:
+      - 7000:7000
+      - 7001:7001
+      - 9042:9042
+      - 9160:9160
+    environment:
+      - INIT_DB=true
+
+  cassandra-node-2:
+    image: cassandra-node
+    container_name: cassandra-node-2
+    restart: always
+    depends_on:
+      - cassandra-node-1
+    links:
+      - cassandra-node-1:cassandra-node-1
+    environment:
+      - CASSANDRA_SEEDS=cassandra-node-1
+
+  # zookeeper & kafka
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    restart: always
+    ports:
+      - 2181:2181
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    restart: always
+    depends_on:
+      - zookeeper
+    links:
+      - zookeeper:zookeeper
+    ports:
+      - 9092:9092
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_HOST_NAME=kafka
+      - KAFKA_ADVERTISED_PORT=9092
+      - KAFKA_CREATE_TOPICS=USER:1:1,PRODUCT:1:1
+      - KAFKA_BROKER_ID=1
+
+  # api
+  api:
+    image: api-service
+    container_name: api-service
+    restart: always
+    depends_on:
+      - user
+      - product
+    links:
+      - user:user
+      - product:product
+    ports:
+      - 8081:8080
+    environment:
+      - SERVICE_PORT_USER=8080
+      - SERVICE_PORT_PRODUCT=8080
+
+  # service
+  user:
+    image: user-service
+    container_name: user-service
+    restart: always
+    depends_on:
+      - kafka
+      - cassandra-node-1
+    links:
+      - kafka:kafka
+      - cassandra-node-1:cassandra_node_1
+      - cassandra-node-1:cassandra_node_2
+    ports:
+      - 8082:8080
+
+  product:
+    image: product-service
+    container_name: product-service
+    restart: always
+    depends_on:
+      - kafka
+      - cassandra-node-1
+    links:
+      - kafka:kafka
+      - cassandra-node-1:cassandra_node_1
+      - cassandra-node-1:cassandra_node_2
+    ports:
+      - 8083:8080
+
+  # consumer
+  consumer-service:
+    image: consumer-service
+    container_name: consumer-service
+    restart: always
+    depends_on:
+      - kafka
+    links:
+      - kafka:kafka
+    ports:
+      - 8084:8080
+
