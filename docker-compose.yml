@@ -48,7 +48,7 @@ services:
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_ADVERTISED_HOST_NAME=kafka
       - KAFKA_ADVERTISED_PORT=9092
-      - KAFKA_CREATE_TOPICS=USER:1:1,PRODUCT:1:1
+      - KAFKA_CREATE_TOPICS=USER:1:1,PRODUCT:1:1,ORDER:1:1
       - KAFKA_BROKER_ID=1
 
   # api
@@ -58,14 +58,17 @@ services:
     restart: always
     depends_on:
       - user
+      - order
       - product
     links:
       - user:user
+      - order:order
       - product:product
     ports:
       - 8081:8080
     environment:
       - SERVICE_PORT_USER=8080
+      - SERVICE_PORT_ORDER=8080
       - SERVICE_PORT_PRODUCT=8080
 
   # service
@@ -76,10 +79,11 @@ services:
     depends_on:
       - kafka
       - cassandra-node-1
+      - cassandra-node-2
     links:
       - kafka:kafka
       - cassandra-node-1:cassandra_node_1
-      - cassandra-node-1:cassandra_node_2
+      - cassandra-node-2:cassandra_node_2
     ports:
       - 8082:8080
 
@@ -90,12 +94,28 @@ services:
     depends_on:
       - kafka
       - cassandra-node-1
+      - cassandra-node-2
     links:
       - kafka:kafka
       - cassandra-node-1:cassandra_node_1
-      - cassandra-node-1:cassandra_node_2
+      - cassandra-node-2:cassandra_node_2
     ports:
       - 8083:8080
+
+  order:
+    image: order-service
+    container_name: order-service
+    restart: always
+    depends_on:
+      - kafka
+      - cassandra-node-1
+      - cassandra-node-2
+    links:
+      - kafka:kafka
+      - cassandra-node-1:cassandra_node_1
+      - cassandra-node-2:cassandra_node_2
+    ports:
+      - 8084:8080
 
   # consumer
   consumer-service:
@@ -107,5 +127,5 @@ services:
     links:
       - kafka:kafka
     ports:
-      - 8084:8080
+      - 8085:8080
 

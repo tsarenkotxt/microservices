@@ -1,6 +1,6 @@
 package com.griddynamics.user.controller;
 
-import com.griddynamics.user.domain.User;
+import com.griddynamics.user.entity.User;
 import com.griddynamics.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

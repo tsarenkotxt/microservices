@@ -1,6 +1,6 @@
 package com.griddynamics.product.repository;
 
-import com.griddynamics.product.domain.Product;
+import com.griddynamics.product.entity.Product;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

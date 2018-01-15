@@ -1,6 +1,6 @@
 package com.griddynamics.user.service;
 
-import com.griddynamics.user.domain.User;
+import com.griddynamics.user.entity.User;
 
 import java.util.List;
 import java.util.UUID;

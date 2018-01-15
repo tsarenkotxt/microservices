@@ -1,6 +1,6 @@
 package com.griddynamics.product.service.impl;
 
-import com.griddynamics.product.domain.Product;
+import com.griddynamics.product.entity.Product;
 import com.griddynamics.product.mapper.JsonMapperWrapper;
 import com.griddynamics.product.repository.ProductRepository;
 import com.griddynamics.product.service.KafkaProducerService;

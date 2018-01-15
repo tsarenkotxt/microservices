@@ -1,6 +1,6 @@
 package com.griddynamics.product.controller;
 
-import com.griddynamics.product.domain.Product;
+import com.griddynamics.product.entity.Product;
 import com.griddynamics.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

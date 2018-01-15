@@ -1,6 +1,6 @@
 package com.griddynamics.product.service;
 
-import com.griddynamics.product.domain.Product;
+import com.griddynamics.product.entity.Product;
 
 import java.util.List;
 import java.util.UUID;

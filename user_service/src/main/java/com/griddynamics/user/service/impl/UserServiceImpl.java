@@ -1,6 +1,6 @@
 package com.griddynamics.user.service.impl;
 
-import com.griddynamics.user.domain.User;
+import com.griddynamics.user.entity.User;
 import com.griddynamics.user.mapper.JsonMapperWrapper;
 import com.griddynamics.user.repository.UserRepository;
 import com.griddynamics.user.service.KafkaProducerService;

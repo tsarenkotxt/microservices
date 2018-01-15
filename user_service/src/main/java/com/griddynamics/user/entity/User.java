@@ -1,4 +1,4 @@
-package com.griddynamics.user.domain;
+package com.griddynamics.user.entity;
 
 import lombok.Data;
 import org.springframework.data.cassandra.mapping.Column;
@@ -20,6 +20,7 @@ public class User {
     @Column("last_name")
     private String lastName;
 
+    @Column("email")
     private String email;
 
     public User() {
