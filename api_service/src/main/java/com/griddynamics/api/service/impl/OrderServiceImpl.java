@@ -1,7 +1,9 @@
 package com.griddynamics.api.service.impl;
 
 import com.griddynamics.api.domain.OrderInfo;
+import com.griddynamics.api.exception.RemoteServerException;
 import com.griddynamics.api.service.OrderService;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,7 @@ public class OrderServiceImpl implements OrderService {
         this.url = protocol + domain + ":" + port + path;
     }
 
+    @HystrixCommand(fallbackMethod = "saveFallback")
     @Override
     public OrderInfo save(OrderInfo orderInfo) {
         LOGGER.info("Save orderInfo: {}", orderInfo);
@@ -42,6 +45,7 @@ public class OrderServiceImpl implements OrderService {
         return response.getBody();
     }
 
+    @HystrixCommand(fallbackMethod = "updateFallback")
     @Override
     public OrderInfo update(UUID id, OrderInfo updated) {
         LOGGER.info("Update orderInfo, id: {}, {}", id, updated);
@@ -50,6 +54,7 @@ public class OrderServiceImpl implements OrderService {
         return response.getBody();
     }
 
+    @HystrixCommand(fallbackMethod = "findOneFallback")
     @Override
     public OrderInfo findOne(UUID id) {
         LOGGER.info("Find orderInfo, id: {}", id);
@@ -57,6 +62,7 @@ public class OrderServiceImpl implements OrderService {
         return response.getBody();
     }
 
+    @HystrixCommand(fallbackMethod = "findAllFallback")
     @Override
     public List<OrderInfo> findAll() {
         LOGGER.info("Find all orders");
@@ -64,10 +70,33 @@ public class OrderServiceImpl implements OrderService {
         return Arrays.asList(response.getBody());
     }
 
+    @HystrixCommand(fallbackMethod = "deleteFallback")
     @Override
     public void delete(UUID id) {
         LOGGER.info("Delete orderInfo, id: {}", id);
         restTemplate.delete(url + id);
+    }
+
+    private OrderInfo saveFallback(OrderInfo orderInfo) {
+        throw new RemoteServerException("Can't save orderInfo, 'Order Service' failure, " + orderInfo);
+    }
+
+    private OrderInfo updateFallback(UUID id, OrderInfo orderInfo) {
+        throw new RemoteServerException(
+                String.format("Can't update orderInfo, 'Order Service' failure, id: %s, %s", id, orderInfo));
+    }
+
+    private OrderInfo findOneFallback(UUID id) {
+        throw new RemoteServerException("Can't find orderInfo, 'Order Service' failure, id: " + id);
+    }
+
+    private List<OrderInfo> findAllFallback() {
+        throw new RemoteServerException("Can't find all orders, 'Order Service' failure");
+    }
+
+    private void deleteFallback(UUID id) {
+        throw new RemoteServerException("Can't delete orderInfo, 'Order Service' failure, id: " + id);
+
     }
 
 }

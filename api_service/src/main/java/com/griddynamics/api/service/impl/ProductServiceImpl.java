@@ -1,7 +1,9 @@
 package com.griddynamics.api.service.impl;
 
 import com.griddynamics.api.domain.Product;
+import com.griddynamics.api.exception.RemoteServerException;
 import com.griddynamics.api.service.ProductService;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,7 @@ public class ProductServiceImpl implements ProductService {
         this.url = protocol + domain + ":" + port + path;
     }
 
+    @HystrixCommand(fallbackMethod = "saveFallback")
     @Override
     public Product save(Product product) {
         LOGGER.info("Save product: {}", product);
@@ -42,6 +45,7 @@ public class ProductServiceImpl implements ProductService {
         return response.getBody();
     }
 
+    @HystrixCommand(fallbackMethod = "updateFallback")
     @Override
     public Product update(UUID id, Product updated) {
         LOGGER.info("Update product, id: {}, {}", id, updated);
@@ -50,6 +54,7 @@ public class ProductServiceImpl implements ProductService {
         return response.getBody();
     }
 
+    @HystrixCommand(fallbackMethod = "findOneFallback")
     @Override
     public Product findOne(UUID id) {
         LOGGER.info("Find product, id: {}", id);
@@ -57,6 +62,7 @@ public class ProductServiceImpl implements ProductService {
         return response.getBody();
     }
 
+    @HystrixCommand(fallbackMethod = "findAllFallback")
     @Override
     public List<Product> findAll() {
         LOGGER.info("Find all products");
@@ -64,10 +70,33 @@ public class ProductServiceImpl implements ProductService {
         return Arrays.asList(response.getBody());
     }
 
+    @HystrixCommand(fallbackMethod = "deleteFallback")
     @Override
     public void delete(UUID id) {
         LOGGER.info("Delete product, id: {}", id);
         restTemplate.delete(url + id);
+    }
+
+    private Product saveFallback(Product product) {
+        throw new RemoteServerException("Can't save product, 'Product Service' failure, " + product);
+    }
+
+    private Product updateFallback(UUID id, Product product) {
+        throw new RemoteServerException(
+                String.format("Can't update product, 'Product Service' failure, id: %s, %s", id, product));
+    }
+
+    private Product findOneFallback(UUID id) {
+        throw new RemoteServerException("Can't find product, 'Product Service' failure, id: " + id);
+    }
+
+    private List<Product> findAllFallback() {
+        throw new RemoteServerException("Can't find all products, 'Product Service' failure");
+    }
+
+    private void deleteFallback(UUID id) {
+        throw new RemoteServerException("Can't delete product, 'Product Service' failure, id: " + id);
+
     }
 
 }

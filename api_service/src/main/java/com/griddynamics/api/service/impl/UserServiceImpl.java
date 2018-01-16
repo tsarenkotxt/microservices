@@ -1,7 +1,9 @@
 package com.griddynamics.api.service.impl;
 
 import com.griddynamics.api.domain.User;
+import com.griddynamics.api.exception.RemoteServerException;
 import com.griddynamics.api.service.UserService;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,7 @@ public class UserServiceImpl implements UserService {
         this.url = protocol + domain + ":" + port + path;
     }
 
+    @HystrixCommand(fallbackMethod = "saveFallback")
     @Override
     public User save(User user) {
         LOGGER.info("Save user: {}", user);
@@ -42,6 +45,7 @@ public class UserServiceImpl implements UserService {
         return response.getBody();
     }
 
+    @HystrixCommand(fallbackMethod = "updateFallback")
     @Override
     public User update(UUID id, User updated) {
         LOGGER.info("Update user, id: {}, {}", id, updated);
@@ -50,6 +54,7 @@ public class UserServiceImpl implements UserService {
         return response.getBody();
     }
 
+    @HystrixCommand(fallbackMethod = "findOneFallback")
     @Override
     public User findOne(UUID id) {
         LOGGER.info("Find user, id: {}", id);
@@ -57,6 +62,7 @@ public class UserServiceImpl implements UserService {
         return response.getBody();
     }
 
+    @HystrixCommand(fallbackMethod = "findAllFallback")
     @Override
     public List<User> findAll() {
         LOGGER.info("Find all users");
@@ -64,10 +70,33 @@ public class UserServiceImpl implements UserService {
         return Arrays.asList(response.getBody());
     }
 
+    @HystrixCommand(fallbackMethod = "deleteFallback")
     @Override
     public void delete(UUID id) {
         LOGGER.info("Delete user, id: {}", id);
         restTemplate.delete(url + id);
+    }
+
+    private User saveFallback(User user) {
+        throw new RemoteServerException("Can't save user, 'User Service' failure, " + user);
+    }
+
+    private User updateFallback(UUID id, User user) {
+        throw new RemoteServerException(
+                String.format("Can't update user, 'User Service' failure, id: %s, %s", id, user));
+    }
+
+    private User findOneFallback(UUID id) {
+        throw new RemoteServerException("Can't find user, 'User Service' failure, id: " + id);
+    }
+
+    private List<User> findAllFallback() {
+        throw new RemoteServerException("Can't find all users, 'User Service' failure");
+    }
+
+    private void deleteFallback(UUID id) {
+        throw new RemoteServerException("Can't delete user, 'User Service' failure, id: " + id);
+
     }
 
 }
