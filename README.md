@@ -22,7 +22,7 @@ docker-compose up
 
 ### Architecture
 
-___________________![](readme/diagram.png)
+![](readme/diagram.png)
 
 
  
