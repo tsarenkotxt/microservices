@@ -1,21 +1,22 @@
 package com.griddynamics.order.service.impl;
 
+import static com.griddynamics.order.kafka.KeySet.DELETE;
+import static com.griddynamics.order.kafka.KeySet.SAVE;
+import static com.griddynamics.order.kafka.KeySet.UPDATE;
+
 import com.griddynamics.order.entity.OrderInfo;
 import com.griddynamics.order.mapper.JsonMapperWrapper;
 import com.griddynamics.order.repository.OrderRepository;
 import com.griddynamics.order.service.KafkaOrderService;
 import com.griddynamics.order.service.OrderService;
+import java.util.List;
+import java.util.UUID;
 import org.apache.commons.collections4.IteratorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.UUID;
-
-import static com.griddynamics.order.kafka.KeySet.*;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -49,7 +50,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderInfo update(UUID id, OrderInfo updated) {
         LOGGER.info("Update order, id: {}, {}", id, updated);
-        OrderInfo orderInfo = orderRepository.findOne(id);
+        OrderInfo orderInfo = orderRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Order not found, id" + id));
         orderInfo.setStatus(updated.getStatus());
         orderInfo.setTotalPrice(updated.getTotalPrice());
         orderInfo.setAddress(updated.getAddress());
@@ -62,7 +64,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderInfo findOne(UUID id) {
         LOGGER.info("Find order, id: {}", id);
-        return orderRepository.findOne(id);
+        return orderRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Order not found, id" + id));
     }
 
     @Override
@@ -75,7 +78,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void delete(UUID id) {
         LOGGER.info("Delete order, id: {}", id);
-        orderRepository.delete(id);
+        orderRepository.deleteById(id);
         kafkaOrderService.send(topic, DELETE, id.toString());
     }
 

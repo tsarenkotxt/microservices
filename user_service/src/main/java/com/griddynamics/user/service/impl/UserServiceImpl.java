@@ -1,21 +1,22 @@
 package com.griddynamics.user.service.impl;
 
+import static com.griddynamics.user.kafka.KeySet.DELETE;
+import static com.griddynamics.user.kafka.KeySet.SAVE;
+import static com.griddynamics.user.kafka.KeySet.UPDATE;
+
 import com.griddynamics.user.entity.User;
 import com.griddynamics.user.mapper.JsonMapperWrapper;
 import com.griddynamics.user.repository.UserRepository;
 import com.griddynamics.user.service.KafkaProducerService;
 import com.griddynamics.user.service.UserService;
+import java.util.List;
+import java.util.UUID;
 import org.apache.commons.collections4.IteratorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.UUID;
-
-import static com.griddynamics.user.kafka.KeySet.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -49,7 +50,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(UUID id, User updated) {
         LOGGER.info("Update user, id: {}, {}", id, updated);
-        User product = userRepository.findOne(id);
+        User product = userRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("User not found, id" + id));
         product.setFirstName(updated.getFirstName());
         product.setLastName(updated.getLastName());
         product.setEmail(updated.getEmail());
@@ -61,7 +63,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findOne(UUID id) {
         LOGGER.info("Find user, id: {}", id);
-        return userRepository.findOne(id);
+        return userRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("User not found, id" + id));
     }
 
     @Override
@@ -74,7 +77,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(UUID id) {
         LOGGER.info("Delete user, id: {}", id);
-        userRepository.delete(id);
+        userRepository.deleteById(id);
         kafkaProducerService.send(topic, DELETE, id.toString());
     }
 

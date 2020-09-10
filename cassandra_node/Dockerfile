@@ -1,4 +1,4 @@
-FROM cassandra
+FROM cassandra:3.11
 
 ARG INIT_DB
 ENV init $INIT_DB

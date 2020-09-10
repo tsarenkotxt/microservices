@@ -1,15 +1,12 @@
 package com.griddynamics.order.entity;
 
-import com.datastax.driver.core.DataType;
-import lombok.Data;
-import org.springframework.data.cassandra.mapping.CassandraType;
-import org.springframework.data.cassandra.mapping.Column;
-import org.springframework.data.cassandra.mapping.PrimaryKey;
-import org.springframework.data.cassandra.mapping.Table;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import lombok.Data;
+import org.springframework.data.cassandra.core.mapping.Column;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
+import org.springframework.data.cassandra.core.mapping.Table;
 
 @Data
 @Table("order_info")
@@ -27,10 +24,10 @@ public class OrderInfo {
     @Column("total_price")
     private BigDecimal totalPrice;
 
-    @CassandraType(type = DataType.Name.UDT, userTypeName = "order_address_type")
+    @Column("address")
     private OrderAddress address;
 
-    @CassandraType(type = DataType.Name.UDT, userTypeName = "order_item_type")
+    @Column("items")
     private List<OrderItem> items;
 
     public OrderInfo() {
